@@ -1,6 +1,9 @@
 .vscode
 .DS_Store
 .idea
+.env
+
+pullreq.txt
 
 # Logs
 logs
