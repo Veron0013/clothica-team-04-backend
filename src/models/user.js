@@ -3,21 +3,32 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new Schema(
   {
-    name: { type: String, trim: true },
+    name: {
+      type: String,
+      trim: true
+    },
     phone: {
       type: String,
       required: true,
       unique: true,
       index: true,
     },
-
     email: {
       type: String,
       lowercase: true,
       trim: true,
     },
-    password: { type: String, required: true, select: false },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    password: {
+      type: String,
+      required: true,
+      select: false
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+      required: true
+    },
   },
   {
     timestamps: true,
@@ -49,6 +60,10 @@ userSchema.pre('save', async function () {
 
 userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.hasRole = function (role) {
+  return this.role === role;
 };
 
 export const User = model('User', userSchema);

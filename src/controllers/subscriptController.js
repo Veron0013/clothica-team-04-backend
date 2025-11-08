@@ -3,15 +3,15 @@ import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { Subscription } from '../models/subscription.js';
-import { sendSubscriptEmail } from '../utils/sendMail.js';
+import { sendMail } from '../utils/sendMail.js';
 
-export const createSubscription = async (req, res, next) => {
+export const createSubscription = async (req, res) => {
   const { email } = req.body;
 
   const subscriptionExist = await Subscription.findOne({ email });
 
   if (subscriptionExist) {
-    return next(createHttpError(409, 'Така поштова адреса вже має підписку.'));
+    throw createHttpError(409, 'Така поштова адреса вже має підписку.');
   }
 
   const subscription = await Subscription.create({ email });
@@ -21,7 +21,7 @@ export const createSubscription = async (req, res, next) => {
   });
 };
 
-export const submitSubscription = async (req, res, next) => {
+export const submitSubscription = async (req, res) => {
   try {
     // шукаю всіх підписників
     const subscribers = await Subscription.find({}, 'email');
@@ -41,7 +41,8 @@ export const submitSubscription = async (req, res, next) => {
         email: subscriber.email,
         link: siteLink,
       });
-      await sendSubscriptEmail({
+      //await sendSubscriptEmail({
+      await sendMail({
         from: process.env.SMTP_FROM,
         to: subscriber.email,
         subject: 'Новинки у Clothica',
@@ -51,7 +52,6 @@ export const submitSubscription = async (req, res, next) => {
 
     res.status(200).json({ message: `Електронні листи надіслані для ${subscribers.length} підписників!` });
   } catch {
-    next(createHttpError(500, 'Не вдалося надіслати електронні листи!'));
-    return;
+    throw createHttpError(500, 'Не вдалося надіслати електронні листи!');
   }
 };

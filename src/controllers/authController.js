@@ -61,6 +61,7 @@ export const loginUser = async (req, res, next) => {
     next(e);
   }
 };
+
 export const logoutUser = async (req, res) => {
   try {
     const { sessionId } = req.cookies;
