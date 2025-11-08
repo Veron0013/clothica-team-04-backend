@@ -14,6 +14,7 @@ import userRoutes from './routes/userRoutes.js';
 import goodsRoutes from "./routes/goodsRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
 import subscriptRoutes from './routes/subscriptRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3030;
@@ -29,6 +30,7 @@ app.use(categoriesRoutes);
 app.use(goodsRoutes);
 app.use(feedbackRoutes);
 app.use(subscriptRoutes);
+app.use(orderRoutes);
 
 //MW
 app.use(notFoundHandler);
