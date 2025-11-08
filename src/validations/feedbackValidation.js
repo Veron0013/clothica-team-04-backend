@@ -16,7 +16,7 @@ export const createFeedbackSchema = {
 
 export const getFeedbacksSchema = {
   [Segments.QUERY]: Joi.object({
-    goodId: Joi.string().custom(objectId),
+    productId: Joi.string().custom(objectId),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(24).default(6),
   }),

@@ -1,5 +1,5 @@
 import createHttpError from "http-errors";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
 import { Feedback } from "../models/feedback.js";
 import { Good } from "../models/good.js";
 
@@ -10,19 +10,18 @@ export const getFeedbacks = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const filter = {};
-    if (req.query.goodId && isValidObjectId(req.query.goodId)) {
-      filter.good = req.query.goodId;
+    if (req.query.productId && isValidObjectId(req.query.productId)) {
+      filter.productId = new Types.ObjectId(`${req.query.productId}`);
     }
 
     const [total, items] = await Promise.all([
       Feedback.countDocuments(filter),
       Feedback.find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ date: -1 })
         .skip(skip)
         .limit(limit)
         .select("-__v")
         .populate("user", "username email")
-        .populate("good", "name"),
     ]);
 
     res.json({
