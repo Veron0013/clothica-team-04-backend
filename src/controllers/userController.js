@@ -43,5 +43,3 @@ export const getUser = async (req, res) => {
 
   res.status(200).json(user);
 };
-
-export const sebscription = async () => {};
