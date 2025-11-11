@@ -8,6 +8,13 @@ import { Types } from 'mongoose';
 import { Category } from '../models/category.js';
 import { GENDERS, SIZES, COLORS } from '../models/good.js';
 
+const toList = (val) => {
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === 'string') {
+    return val.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  return [];
+};
 export const getAllGoods = async (req, res, next) => {
   try {
     const {
@@ -39,12 +46,19 @@ export const getAllGoods = async (req, res, next) => {
     if (category && isValidObjectId(category)) filter.category = new Types.ObjectId(`${category}`);
 
     if (sizes) {
-      const list = String(sizes).split(',').map(s => s.trim()).filter(Boolean);
+      const list = toList(sizes);
       if (list.length) filter.size = { $in: list };
     }
     if (color) filter.color = color;
-    if (gender) filter.gender = gender;
 
+    if (gender) {
+      const list = toList(gender).map(s => s.toLowerCase());
+      if (list.length === 1) {
+        filter.gender = list[0];
+      } else if (list.length > 1) {
+        filter.gender = { $in: Array.from(new Set(list)) };
+      }
+    }
     const sortMap = {
       price_asc: { 'price.value': 1 },
       price_desc: { 'price.value': -1 },
