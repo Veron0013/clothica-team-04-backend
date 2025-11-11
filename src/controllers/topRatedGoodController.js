@@ -73,7 +73,7 @@ export const getTopRatedGoods = async (req, res, next) => {
 		const skip = (page - 1) * limit;
 
 		const pipeline = [
-			{ $sort: { createdAt: -1 } },
+			{ $sort: { averageRating: -1 } },
 			{ $skip: skip },
 			{ $limit: limit },
 			{
@@ -88,13 +88,11 @@ export const getTopRatedGoods = async (req, res, next) => {
 			...feedbackPipeline('$product._id'),
 			{
 				$project: {
-					productId: '$product._id',
-					product: {
-						name: '$product.name',
-						price: '$product.price.value',
-						currency: '$product.price.currency',
-						image: '$product.image',
-					},
+					_id: '$product._id',
+					name: '$product.name',
+					price: '$product.price.value',
+					currency: '$product.price.currency',
+					image: '$product.image',
 					feedbackCount: 1,
 					averageRating: 1,
 				},

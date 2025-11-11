@@ -15,6 +15,7 @@ const toList = (val) => {
   }
   return [];
 };
+
 export const getAllGoods = async (req, res, next) => {
   try {
     const {
@@ -65,7 +66,10 @@ export const getAllGoods = async (req, res, next) => {
       name_asc: { name: 1 },
       name_desc: { name: -1 },
     };
-    const sortStage = sortMap[sort] || { createdAt: -1 };
+    //const sortStage = sortMap[sort] || { createdAt: -1 };
+
+    const sortStage = sortMap[sort] || { category: 1, _id: 1 };
+
 
     const pageNum = Math.max(1, Number(page));
     const perPageNum = Math.max(8, Number(perPage));
