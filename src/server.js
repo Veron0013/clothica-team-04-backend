@@ -24,7 +24,10 @@ const PORT = process.env.PORT ?? 3030;
 app.use(express.json());
 app.use(
   cors({
-    origin: ["https://project-clothica-team-04-frontend-g2q4-igors-projects-79246ad5.vercel.app/"],
+    origin: [
+      "https://project-clothica-team-04-frontend.vercel.app",
+      "http://localhost:3000"
+    ],
     credentials: true,
   })
 )
