@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://project-clothica-team-04-frontend.vercel.app",
+      "https://clothica-team-04-frontend.vercel.appp",
       "http://localhost:3000"
     ],
     credentials: true,
