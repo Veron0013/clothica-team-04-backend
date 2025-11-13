@@ -26,12 +26,12 @@ export const getAllGoods = async (req, res, next) => {
       color,
       gender,
       page,
-      perPage,
+      limit,
       sort,
     } = req.query;
 
     //const pageNum = Math.max(1, Number(page) || 1);
-    //const perPageNum = Math.min(12, Math.max(8, Number(perPage) || 12));
+    //const limitNum = Math.min(12, Math.max(8, Number(limit) || 12));
     const priceMin = Number(fromPrice);
     const priceMax = Number(toPrice);
 
@@ -72,18 +72,18 @@ export const getAllGoods = async (req, res, next) => {
 
 
     const pageNum = Math.max(1, Number(page));
-    const perPageNum = Math.max(8, Number(perPage));
-    const skip = (pageNum - 1) * perPageNum;
+    const limitNum = Math.max(8, Number(limit));
+    const skip = (pageNum - 1) * limitNum;
 
-    const pipeline = goodsBasePipeline(filter, sortStage, skip, perPageNum);
+    const pipeline = goodsBasePipeline(filter, sortStage, skip, limitNum);
     const goods = await Good.aggregate(pipeline);
     const totalGoods = await Good.countDocuments(filter);
 
     res.status(200).json({
       page: pageNum,
-      perPage: perPageNum,
+      limit: limitNum,
       totalGoods,
-      totalPages: Math.ceil(totalGoods / perPageNum),
+      totalPages: Math.ceil(totalGoods / limitNum),
       goods,
     });
   } catch (err) {

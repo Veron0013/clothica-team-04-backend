@@ -4,11 +4,11 @@ import { Category } from '../models/category.js';
 export const getAllCategories = async (req, res, next) => {
   try {
     const page = Number(req.query.page) || 1;
-    const perPage = Number(req.query.perPage) || 6;
-    const skip = (page - 1) * perPage;
+    const limit = Number(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
 
     const totalCategories = await Category.countDocuments();
-    const totalPages = Math.max(1, Math.ceil(totalCategories / perPage));
+    const totalPages = Math.max(1, Math.ceil(totalCategories / limit));
     if (totalCategories > 0 && page > totalPages) {
       return next(createHttpError(404, 'Page not found'));
     }
@@ -16,7 +16,7 @@ export const getAllCategories = async (req, res, next) => {
     const categories = await Category.aggregate([
       { $sort: { name: 1 } },
       { $skip: skip },
-      { $limit: perPage },
+      { $limit: limit },
       {
         $project: {
           name: 1,
@@ -25,7 +25,7 @@ export const getAllCategories = async (req, res, next) => {
       },
     ]);
 
-    res.status(200).json({ page, perPage, totalCategories, totalPages, categories });
+    res.status(200).json({ page, limit, totalCategories, totalPages, categories });
   } catch (err) { next(err); }
 };
 
