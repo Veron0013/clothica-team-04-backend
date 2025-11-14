@@ -7,6 +7,14 @@ const userSchema = new Schema(
       type: String,
       trim: true
     },
+    lastName: {
+      type: String,
+      trim: true
+    },
+    city: {
+     type: String,
+     trim: true 
+    },
     phone: {
       type: String,
       required: true,
@@ -27,6 +35,10 @@ const userSchema = new Schema(
       type: String,
       enum: ['user', 'admin'],
       default: 'user'
+    },
+    novaPoshtaBranch: {
+      type: Number,
+     trim: true 
     },
   },
 
