@@ -12,8 +12,8 @@ const userSchema = new Schema(
       trim: true
     },
     city: {
-     type: String,
-     trim: true 
+      type: String,
+      trim: true
     },
     phone: {
       type: String,
@@ -36,9 +36,14 @@ const userSchema = new Schema(
       enum: ['user', 'admin'],
       default: 'user'
     },
-    novaPoshtaBranch: {
-      type: Number,
-     trim: true 
+    warehoseNumber: {
+      type: String,
+      trim: true
+    },
+    avatar: {
+      type: String,
+      required: false,
+      default: "https://ac.goit.global/fullstack/react/default-avatar.jpg",
     },
   },
 
