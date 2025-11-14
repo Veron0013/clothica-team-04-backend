@@ -26,7 +26,6 @@ export const registerUser = async (req, res) => {
   setSessionCookies(res, newSession);
 
   res.status(201).json(user);
-
 };
 
 export const loginUser = async (req, res, next) => {
@@ -116,12 +115,51 @@ export const refreshUserSession = async (req, res, next) => {
 
 export const getSession = async (req, res, next) => {
   try {
-    if (!req.user?.id) return next(createHttpError(401, 'Unauthorized'));
+    const { sessionId } = req.cookies || {};
 
-    const user = await User.findById(req.user.id).select('-password').lean();
+    // 1. Нема sessionId в куках – користувач не залогінений
+    if (!sessionId) {
+      return next(createHttpError(401, 'Unauthorized'));
+    }
 
-    if (!user) return next(createHttpError(401, 'Unauthorized'));
+    // 2. Шукаємо сесію в базі
+    const session = await Session.findById(sessionId);
 
+    if (!session) {
+      // Сесії немає – чистимо кукі
+      res.clearCookie('sessionId');
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      return next(createHttpError(401, 'Unauthorized'));
+    }
+
+    // 3. Перевіряємо, чи сесія ще валідна по refreshTokenValidUntil
+    const isSessionExpired = session.refreshTokenValidUntil && new Date() > new Date(session.refreshTokenValidUntil);
+
+    if (isSessionExpired) {
+      await Session.deleteOne({ _id: session._id });
+
+      res.clearCookie('sessionId');
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+
+      return next(createHttpError(401, 'Session expired'));
+    }
+
+    // 4. Дістаємо користувача
+    const user = await User.findById(session.userId).select('-password').lean();
+
+    if (!user) {
+      await Session.deleteOne({ _id: session._id });
+
+      res.clearCookie('sessionId');
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+
+      return next(createHttpError(401, 'Unauthorized'));
+    }
+
+    // 5. Все ок – повертаємо користувача
     res.json({ user });
   } catch (e) {
     next(e);
@@ -194,3 +232,4 @@ export const resetPassword = async (req, res) => {
     message: 'Password reset successfully. Please log in again.',
   });
 };
+
