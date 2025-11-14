@@ -31,6 +31,13 @@ export const getAllGoods = async (req, res, next) => {
       search,
     } = req.query;
 
+    //const pageNum = Math.max(1, Number(page) || 1);
+    //const limitNum = Math.min(12, Math.max(8, Number(limit) || 12));
+    const priceMin = Number(fromPrice);
+    const priceMax = Number(toPrice);
+
+    const filter = {}
+
     if (search) {
       if (search.length > 3) {
         // text-indexed search
@@ -40,13 +47,6 @@ export const getAllGoods = async (req, res, next) => {
         filter.name = { $regex: `^${search}`, $options: "i" };
       }
     }
-
-    //const pageNum = Math.max(1, Number(page) || 1);
-    //const limitNum = Math.min(12, Math.max(8, Number(limit) || 12));
-    const priceMin = Number(fromPrice);
-    const priceMax = Number(toPrice);
-
-    const filter = {}
 
     if (priceMin > 0 && priceMax > 0) {
       if (priceMin > priceMax)
