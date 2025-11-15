@@ -59,6 +59,12 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
+const clearAuthCookies = (res) => {
+  res.clearCookie('sessionId');
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+};
+
 export const logoutUser = async (req, res) => {
   try {
     const { sessionId } = req.cookies;
@@ -70,17 +76,9 @@ export const logoutUser = async (req, res) => {
     console.error('Error deleting session:', error.message);
   }
 
-  res.clearCookie('sessionId');
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
+  clearAuthCookies(res)
 
   res.status(204).send();
-};
-
-const clearAuthCookies = (res) => {
-  res.clearCookie('sessionId');
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
 };
 
 export const refreshUserSession = async (req, res, next) => {
