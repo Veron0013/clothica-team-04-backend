@@ -77,41 +77,42 @@ export const logoutUser = async (req, res) => {
   res.status(204).send();
 };
 
-export const refreshUserSession = async (req, res, next) => {
-  if (!req.cookies?.sessionId || !req.cookies?.refreshToken) {
-    res.clearCookie('sessionId');
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+const clearAuthCookies = (res) => {
+  res.clearCookie('sessionId');
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+};
 
-    throw createHttpError(400, 'Invalid or expired refresh token');
+export const refreshUserSession = async (req, res, next) => {
+  const { sessionId, refreshToken } = req.cookies || {};
+  if (!sessionId || !refreshToken) {
+    clearAuthCookies(res);
+    return next(createHttpError(400, 'Invalid or expired refresh token'));
   }
 
-  const { sessionId, refreshToken } = req.cookies;
-
-  const session = await Session.findOne({
-    _id: sessionId,
-    refreshToken,
-  });
-
+  const session = await Session.findOne({ _id: sessionId, refreshToken });
   if (!session) {
+    clearAuthCookies(res);
     return next(createHttpError(401, 'Session not found'));
   }
 
-  const isSessionExpired = new Date() > new Date(session.refreshTokenValidUntil);
-
-  if (isSessionExpired) {
+  if (new Date() > new Date(session.refreshTokenValidUntil)) {
+    await Session.deleteOne({ _id: sessionId, refreshToken });
+    clearAuthCookies(res);
     return next(createHttpError(401, 'Token expired'));
   }
 
-  await Session.deleteOne({
-    _id: sessionId,
-    refreshToken,
-  });
-
+  await Session.deleteOne({ _id: sessionId, refreshToken });
   const newSession = await createSession(session.userId);
   setSessionCookies(res, newSession);
 
-  res.status(200).json({ message: 'Session refreshed' });
+  const user = await User.findById(session.userId).select('-password').lean();
+  if (!user) {
+    clearAuthCookies(res);
+    return next(createHttpError(401, 'User not found'));
+  }
+
+  return res.json({ user });
 };
 
 export const getSession = async (req, res, next) => {
