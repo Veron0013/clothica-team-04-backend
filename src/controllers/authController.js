@@ -115,17 +115,10 @@ export const refreshUserSession = async (req, res, next) => {
 };
 
 export const getSession = async (req, res, next) => {
-  try {
-    if (!req.user?.id) return next(createHttpError(401, 'Unauthorized'));
-
-    const user = await User.findById(req.user.id).select('-password').lean();
-
-    if (!user) return next(createHttpError(401, 'Unauthorized'));
-
-    res.json({ user });
-  } catch (e) {
-    next(e);
+  if (req.cookies?.accessToken) {
+    return res.status(200).json({ message: 'OK' });
   }
+  await refreshUserSession(req, res, next);
 };
 
 export const requestResetEmail = async (req, res) => {
