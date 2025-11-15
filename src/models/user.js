@@ -3,6 +3,10 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new Schema(
   {
+    username: {
+      type: String,
+      trim: true
+    },
     name: {
       type: String,
       trim: true
@@ -36,7 +40,11 @@ const userSchema = new Schema(
       enum: ['user', 'admin'],
       default: 'user'
     },
-    warehoseNumber: {
+    warehoseId: {
+      type: String,
+      trim: true
+    },
+    warehoseString: {
       type: String,
       trim: true
     },

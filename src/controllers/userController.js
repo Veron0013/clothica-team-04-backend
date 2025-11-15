@@ -8,28 +8,10 @@ export const updateUserProfile = async (req, res) => {
     throw createHttpError(404, 'user not found');
   }
 
- let {
-    name,
-    lastName,
-    phone,
-    city,
-    warehoseNumber,
-  } = req.user;
-
-  if (req.body.firstName) name = req.body.name;
-  if (req.body.lastName) lastName = req.body.lastName;
-  if (req.body.phone) phone = req.body.phone;
-  if (req.body.city) city = req.body.city;
-  if (req.body.warehoseNumber) warehoseNumber = req.body.novaPoshtaBranch;
-
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     {
-      name,
-      lastName,
-      phone,
-      city,
-      warehoseNumber,
+      ...req.user
     },
     { new: true }
   );
