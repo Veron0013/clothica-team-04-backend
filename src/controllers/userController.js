@@ -1,5 +1,7 @@
 import createHttpError from 'http-errors';
 import { User } from '../models/user.js';
+import { Session } from '../models/session.js';
+import { createSession, setSessionCookies } from '../services/auth.js';
 
 export const updateUserProfile = async (req, res) => {
   const userId = req.user._id;
@@ -8,13 +10,7 @@ export const updateUserProfile = async (req, res) => {
     throw createHttpError(404, 'user not found');
   }
 
- let {
-    name,
-    lastName,
-    phone,
-    city,
-    novaPoshtaBranch,
-  } = req.user;
+  let { name, lastName, phone, city, novaPoshtaBranch } = req.user;
 
   if (req.body.firstName) name = req.body.name;
   if (req.body.lastName) lastName = req.body.lastName;
@@ -31,18 +27,72 @@ export const updateUserProfile = async (req, res) => {
       city,
       novaPoshtaBranch,
     },
-    { new: true }
+    { new: true },
   );
 
   res.status(200).json(updatedUser);
 };
 
-
 export const getCurrentUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    if (req.user) {
+      const user = await User.findById(req.user._id).select('-password');
+      if (!user) {
+        throw createHttpError(404, 'User not found');
+      }
+      return res.status(200).json(user);
+    }
+
+    const { accessToken, refreshToken, sessionId } = req.cookies ?? {};
+
+    if (!accessToken && !refreshToken && !sessionId) {
+      return next(createHttpError(401, 'Unauthorized'));
+    }
+
+    let session = null;
+
+    if (accessToken) {
+      const found = await Session.findOne({ accessToken });
+      if (found && new Date(found.accessTokenValidUntil) > new Date()) {
+        session = found;
+      }
+    }
+
+    if (!session && refreshToken && sessionId) {
+      const oldSession = await Session.findOne({
+        _id: sessionId,
+        refreshToken,
+      });
+
+      if (!oldSession) {
+        res.clearCookie('sessionId');
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+        return next(createHttpError(401, 'Session not found'));
+      }
+
+      const isRefreshExpired = new Date(oldSession.refreshTokenValidUntil) <= new Date();
+      if (isRefreshExpired) {
+        await Session.deleteOne({ _id: oldSession._id });
+        res.clearCookie('sessionId');
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+        return next(createHttpError(401, 'Token expired'));
+      }
+
+      await Session.deleteOne({ _id: oldSession._id });
+      const newSession = await createSession(oldSession.userId);
+      setSessionCookies(res, newSession);
+      session = newSession;
+    }
+
+    if (!session) {
+      return next(createHttpError(401, 'Unauthorized'));
+    }
+
+    const user = await User.findById(session.userId).select('-password').lean();
     if (!user) {
-      throw createHttpError(404, "User not found");
+      return next(createHttpError(401, 'Unauthorized'));
     }
 
     res.status(200).json(user);

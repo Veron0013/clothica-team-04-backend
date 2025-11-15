@@ -36,9 +36,9 @@ const userSchema = new Schema(
       enum: ['user', 'admin'],
       default: 'user'
     },
-    warehoseNumber: {
+    novaPoshtaBranch: {
       type: String,
-      trim: true
+      trim: true,
     },
     avatar: {
       type: String,

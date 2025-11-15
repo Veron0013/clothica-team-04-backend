@@ -26,7 +26,6 @@ export const registerUser = async (req, res) => {
   setSessionCookies(res, newSession);
 
   res.status(201).json(user);
-
 };
 
 export const loginUser = async (req, res, next) => {
@@ -116,13 +115,57 @@ export const refreshUserSession = async (req, res, next) => {
 
 export const getSession = async (req, res, next) => {
   try {
-    if (!req.user?.id) return next(createHttpError(401, 'Unauthorized'));
+    const { accessToken, refreshToken, sessionId } = req.cookies ?? {};
 
-    const user = await User.findById(req.user.id).select('-password').lean();
+    const clearAll = async () => {
+      if (sessionId) {
+        await Session.deleteOne({ _id: sessionId }).catch(() => {});
+      }
 
-    if (!user) return next(createHttpError(401, 'Unauthorized'));
+      res.clearCookie('sessionId');
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
 
-    res.json({ user });
+      return next(createHttpError(401, 'Unauthorized'));
+    };
+
+    if (!accessToken && (!refreshToken || !sessionId)) {
+      return clearAll();
+    }
+
+    if (accessToken) {
+      const session = await Session.findOne({ accessToken });
+
+      if (session && new Date(session.accessTokenValidUntil) > new Date()) {
+        return res.status(200).json({ message: 'Session active' });
+      }
+    }
+
+    if (refreshToken && sessionId) {
+      const session = await Session.findOne({
+        _id: sessionId,
+        refreshToken,
+      });
+
+      if (!session) {
+        return clearAll();
+      }
+
+      const isRefreshExpired = new Date(session.refreshTokenValidUntil) < new Date();
+
+      if (isRefreshExpired) {
+        await Session.deleteOne({ _id: session._id });
+        return clearAll();
+      }
+
+      await Session.deleteOne({ _id: session._id });
+      const newSession = await createSession(session.userId);
+      setSessionCookies(res, newSession);
+
+      return res.status(200).json({ message: 'Session refreshed' });
+    }
+
+    return clearAll();
   } catch (e) {
     next(e);
   }
