@@ -114,7 +114,7 @@ export const refreshUserSession = async (req, res) => {
     throw createHttpError(401, 'User not found');
   }
 
-  return res.json({ user });
+  return res.json(user);
 };
 
 export const getSession = async (req, res, next) => {
