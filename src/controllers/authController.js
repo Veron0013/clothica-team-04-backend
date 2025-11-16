@@ -89,7 +89,9 @@ export const refreshUserSession = async (req, res) => {
     clearAuthCookies(res);
     throw createHttpError(400, 'Invalid or expired refresh token');
   }
-  //console.log("sessionId", sessionId, refreshToken)
+
+  console.log("sessionId", sessionId, refreshToken)
+
   const session = await Session.findOne({ _id: sessionId, refreshToken });
   if (!session) {
     clearAuthCookies(res);
