@@ -139,9 +139,9 @@ export const getSession = async (req, res, next) => {
 };
 
 export const requestResetEmail = async (req, res) => {
-  const { email } = req.body;
-
-  const user = await User.findOne({ email });
+  const {phone, email } = req.body;
+console.log(phone, email)
+  const user = await User.findOne({ phone});
 
   if (!user) {
     return res.status(200).json({

@@ -10,6 +10,6 @@ router.post('/auth/login', celebrate({ [Segments.BODY]: loginUserSchema }, { abo
 router.post('/auth/logout', logoutUser);
 router.post('/auth/refresh', refreshUserSession);
 router.get('/auth/me', getSession);
-router.post("/auth/request-reset-pwd", celebrate(requestResetEmailSchema), requestResetEmail )
-router.post("/auth/reset-password", celebrate(resetPasswordSchema), resetPassword)
+router.post('/auth/request-reset-pwd', celebrate(requestResetEmailSchema), requestResetEmail )
+router.post('/auth/reset-password', celebrate(resetPasswordSchema), resetPassword)
 export default router;
