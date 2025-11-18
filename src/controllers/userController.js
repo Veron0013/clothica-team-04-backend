@@ -8,6 +8,8 @@ export const updateUserProfile = async (req, res) => {
 
   let updateData = { ...req.body };
 
+  console.log(updateData)
+
   if (req.file) {
     const result = await saveFileToCloudinary(req.file.buffer);
     updateData.avatar = result.secure_url;

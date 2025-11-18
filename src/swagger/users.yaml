@@ -53,7 +53,7 @@ components:
         name:
           type: string
           example: 'John'
-        lastName:
+        lastname:
           type: string
           example: 'Doe'
         phone:
@@ -81,7 +81,7 @@ components:
         name:
           type: string
           example: 'John'
-        lastName:
+        lastname:
           type: string
           example: 'Doe'
         phone:

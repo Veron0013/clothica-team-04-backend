@@ -4,7 +4,7 @@ import { Joi, Segments } from "celebrate";
 export const updateUserSchema = {
 	[Segments.BODY]: Joi.object({
 		name: Joi.string().min(2).allow("", null),
-		lastName: Joi.string().allow("", null),
+		lastname: Joi.string().allow("", null),
 		city: Joi.string().allow("", null),
 		phone: Joi.string()
 			.required()
