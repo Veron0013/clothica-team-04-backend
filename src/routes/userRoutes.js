@@ -9,6 +9,8 @@ const router = Router();
 
 router.get('/users/me', authenticate, getCurrentUser);
 
-router.patch('/users/me', authenticate, upload.single('avatar'), updateUserProfile);
+router.patch('/users/me', authenticate, updateUserProfile);
+
+router.patch('/users/me/avatar', authenticate, upload.single('avatar'), updateUserProfile);
 
 export default router;
